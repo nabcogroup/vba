@@ -1,0 +1,106 @@
+
+Public Function FullDescriptionArabic(valueRange As Range, arabicDescription As Range, arabicCount As Range, intPosArabic As Integer) As String
+    
+    Dim arValues() As String
+    Dim intCountRange As Integer
+    Dim strFullDescription As String
+    
+    
+    ReDim arValues(valueRange.Count - 1)
+    intCountRange = 0
+    strFullDescription = ""
+    For Each cell In valueRange
+        Dim strCellValue As String
+        strCellValue = ""
+        
+        If (Len(Trim(cell.value)) > 0) Then
+            strCellValue = ConArabic(cell.value, arabicDescription, arabicCount, intPosArabic)
+        End If
+        arValues(intCountRange) = strCellValue
+        intCountRange = intCountRange + 1
+    Next cell
+    
+    If (UBound(arValues) > 0) Then
+        For i = LBound(arValues) To UBound(arValues)
+             If (Len(Trim(arValues(i))) > 0) Then
+                strFullDescription = strFullDescription & " + " & arValues(i)
+             End If
+        Next i
+       
+    End If
+    
+    FullDescriptionArabic = strFullDescription
+End Function
+
+
+
+Public Function ConArabic(value As String, arabicDescription As Range, arabicCount As Range, intPosArabic As Integer) As String
+    
+    Dim retValues() As String
+    Dim intValueCount As Integer
+    Dim retStringValue As String
+    
+    
+    
+    
+    retValues = ParseWord(Trim(value))
+    retStringValue = ""
+    Dim strArDescValue As String, strQty As String
+    strArDescValue = ""
+    strQty = ""
+    For i = LBound(retValues) To UBound(retValues)
+        
+        Dim rgArabicNum As Range, rgArDesc As Range
+                
+        If (Len(Trim(retValues(i))) > 0) Then
+             If (IsNumeric(retValues(i))) Then
+                Set rgArabicNum = arabicCount.Find(Trim(retValues(i)), LookIn:=xlValues, LookAt:=xlWhole, SearchDirection:=xlNext)
+                If Not rgArabicNum Is Nothing Then
+                    strQty = ""
+                    strQty = Trim(arabicCount.Cells(rgArabicNum.Row, 2).value)
+                End If
+            Else
+                 Set rgArDesc = arabicDescription.Find(Trim(retValues(i)), LookIn:=xlValues, LookAt:=xlWhole, SearchDirection:=xlNext)
+                If Not rgArDesc Is Nothing Then
+                    strArDescValue = ""
+                    strArDescValue = Trim(arabicDescription.Cells(rgArDesc.Row, intPosArabic).value)
+                End If
+            End If
+        End If
+        
+    Next i
+    retStringValue = strQty & " " & strArDescValue
+    ConArabic = retStringValue
+    
+End Function
+
+
+Public Function ParseWord(value As String) As String()
+
+    
+    Dim objReg As RegExp
+    Dim objMatches As Object
+    Dim strValues(1 To 3) As String
+    Set objReg = New RegExp
+    
+    objReg.Global = True
+    
+    objReg.Pattern = "([A-Z|\W]+)(\d+)"
+    Set objMatches = objReg.Execute(value)
+    
+    For Each Match In objMatches
+        
+        Dim counter As Integer
+        
+        counter = Match.SubMatches.Count - 1
+        For i = 0 To counter
+            strValues(i + 1) = Match.SubMatches(i)
+        Next i
+        
+    Next
+    
+    
+    
+    ParseWord = strValues
+    
+End Function
