@@ -1,0 +1,24 @@
+Sub InsertPics()
+    Dim r As Range, Shrink As Long
+    Dim shpPic As Shape
+    Dim strFileName As String
+    
+    Application.ScreenUpdating = False
+    Shrink = 0 'Provides negative offset from cell borders when > 0
+    
+    On Error Resume Next
+    For Each r In Range("B2:B44")
+    strFileName = "\\192.168.0.6\act\Stores\IMAGES\" & r.Value & ".jpg"
+    If strFileName <> "" Then
+        Set shpPic = ActiveSheet.Shapes.AddPicture(Filename:=strFileName, linktofile:=msoFalse, _
+            savewithdocument:=msoTrue, Left:=Cells(r.Row, 1).Left + Shrink, Top:=Cells(r.Row, 1).Top + Shrink, _
+                Width:=-1, Height:=-1)
+        With shpPic
+            .LockAspectRatio = msoTrue
+            .Width = Columns(2).Width - (2 * Shrink)
+            Rows(r.Row).RowHeight = .Height + (8 * 2)
+        End With
+    End If
+Next r
+Application.ScreenUpdating = True
+End Sub
